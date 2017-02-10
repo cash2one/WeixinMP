@@ -4,7 +4,7 @@
 
 ### 代码地址
 	
-	[https://github.com/zengkv/WeixinMP](https://github.com/zengkv/WeixinMP)
+[https://github.com/zengkv/WeixinMP](https://github.com/zengkv/WeixinMP)
 
 ### 使用示例
 
