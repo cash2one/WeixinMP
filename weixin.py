@@ -20,6 +20,7 @@ apis = {
 	"qrcode" : "https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=getqrcode&param=4300",
 	"loginqrcode" : "https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=ask&token=&lang=zh_CN&f=json&ajax=1",
 	"loginask" : "https://mp.weixin.qq.com/cgi-bin/loginqrcode?action=ask&token=&lang=zh_CN&f=json&ajax=1",
+	"loginauth" : "https://mp.weixin.qq.com/cgi-bin/loginauth?action=ask&token=&lang=zh_CN&f=json&ajax=1",
 	"bizlogin" : "https://mp.weixin.qq.com/cgi-bin/bizlogin?action=login&lang=zh_CN"
 }
 
@@ -62,16 +63,31 @@ class WeixinMP(object):
 			f.write(res.content)
 			f.flush()
 
-			print "等待扫码"
+			print "请打开test.jpg，用微信扫码"
+			askapi = apis["loginask"]
 			while True:
-				res = self.req(apis["loginask"])
-				if res.json()["status"] == 1:
-					print "登录成功"
-					break
-				elif res.json()["status"] == 4:
+				res = self.req(askapi)
+				rej = res.json()
+				if rej["status"] == 1:
+					if "user_category" in rej and rej["user_category"] == 1:
+						askapi = apis["loginauth"]
+					else:
+						print "登录成功"
+						break
+				elif rej["status"] == 4:
 					print "已经扫码"
+				elif rej["status"] == 2:
+					print "管理员拒绝"
+					raise Exception("%s login refuse" % self.name)
+				elif rej["status"] == 3:
+					print "登录超时"
+					raise Exception("%s login overtime" % self.name)
+					break
 				else:
-					print "等待扫码"
+					if askapi == apis["loginask"]:
+						print "请打开test.jpg，用微信扫码"
+					else:
+						print "等待确认"
 
 				time.sleep(1)
 
